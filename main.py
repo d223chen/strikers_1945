@@ -230,8 +230,45 @@ class Score(pg.sprite.Sprite):
             msg = "Score: %d" % SCORE
             self.image = self.font.render(msg, 0, self.color)
 
+def render_background(screen: pg.surface.Surface) -> pg.surface.Surface:
+    bgdtile = load_image("water.png")
+    background = pg.Surface(SCREENRECT.size)
+    for x in range(0, SCREENRECT.width, bgdtile.get_width()):
+        for y in range(0, SCREENRECT.height, bgdtile.get_height()):
+            background.blit(bgdtile, (x, y))
+    screen.blit(background, (0, 0))
+    pg.display.flip()
+    return background
+
+def load_images():
+    # Load images, assign to sprite classes
+    # (do this before the classes are used, after screen setup)
+    Player.images = [load_image(im) for im in ("player1.png","player2.png", "player3.png")]
+    img = load_image("explosion.gif")
+    Explosion.images = [img, pg.transform.flip(img, 1, 1)]
+    Enemy.images = [load_image(im) for im in ("enemy.png",)]
+    Bomb.images = [load_image("bomb.png")]
+    Shot.images = [load_image("shot.png")]
+    
+def decorate_game_window():
+    icon = pg.transform.scale(Enemy.images[0], (32, 32))
+    pg.display.set_icon(icon)
+    pg.display.set_caption("Pygame Strikers 1945")
+    pg.mouse.set_visible(0)
+    
+def initialize_sounds(PLAY_MUSIC: bool):
+    boom_sound = load_sound("boom.wav")
+    shoot_sound = load_sound("car_door.wav")
+    if PLAY_MUSIC:
+        music_file = os.path.join(main_dir, "data", "in_the_name_of_strikers.mp3")
+        music = vlc.MediaPlayer(music_file)
+        music.play()
+        
+    return boom_sound, shoot_sound
 
 def main(winstyle=0):
+    PLAY_MUSIC = True
+    
     # Initialize pygame
     if pg.get_sdl_version()[0] == 2:
         pg.mixer.pre_init(44100, 32, 2, 1024)
@@ -246,36 +283,12 @@ def main(winstyle=0):
     bestdepth = pg.display.mode_ok(SCREENRECT.size, winstyle, 32)
     screen = pg.display.set_mode(SCREENRECT.size, winstyle, bestdepth)
 
-    # Load images, assign to sprite classes
-    # (do this before the classes are used, after screen setup)
-    Player.images = [load_image(im) for im in ("player1.png","player2.png", "player3.png")]
-    img = load_image("explosion.gif")
-    Explosion.images = [img, pg.transform.flip(img, 1, 1)]
-    Enemy.images = [load_image(im) for im in ("enemy.png",)]
-    Bomb.images = [load_image("bomb.png")]
-    Shot.images = [load_image("shot.png")]
-
-    # decorate the game window
-    icon = pg.transform.scale(Enemy.images[0], (32, 32))
-    pg.display.set_icon(icon)
-    pg.display.set_caption("Pygame Strikers 1945")
-    pg.mouse.set_visible(0)
-
-    # create the background, tile the bgd image
-    bgdtile = load_image("water.png")
-    background = pg.Surface(SCREENRECT.size)
-    for x in range(0, SCREENRECT.width, bgdtile.get_width()):
-        for y in range(0, SCREENRECT.height, bgdtile.get_height()):
-            background.blit(bgdtile, (x, y))
-    screen.blit(background, (0, 0))
-    pg.display.flip()
+    load_images()
+    decorate_game_window()
+    background = render_background(screen)
 
     # load the sound effects
-    boom_sound = load_sound("boom.wav")
-    shoot_sound = load_sound("car_door.wav")
-    # music_file = os.path.join(main_dir, "data", "in_the_name_of_strikers.mp3")
-    # music = vlc.MediaPlayer(music_file)
-    # music.play()
+    boom_sound, shoot_sound = initialize_sounds(PLAY_MUSIC)
 
     # Initialize Game Groups
     enemies = pg.sprite.Group()
