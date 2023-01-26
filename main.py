@@ -265,7 +265,8 @@ def main(winstyle=0):
     bgdtile = load_image("water.png")
     background = pg.Surface(SCREENRECT.size)
     for x in range(0, SCREENRECT.width, bgdtile.get_width()):
-        background.blit(bgdtile, (x, 0))
+        for y in range(0, SCREENRECT.height, bgdtile.get_height()):
+            background.blit(bgdtile, (x, y))
     screen.blit(background, (0, 0))
     pg.display.flip()
 
