@@ -181,7 +181,7 @@ class Shot(pg.sprite.Sprite):
         Every tick we move the shot upwards.
         """
         self.rect.move_ip(0, self.speed)
-        if self.rect.top <= 0:
+        if self.rect.top <= -self.image.get_height():
             self.kill()
 
 
