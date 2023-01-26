@@ -38,7 +38,7 @@ if not pg.image.get_extended():
 # game constants
 MAX_SHOTS = 2  # most player bullets onscreen
 ENEMY_ODDS = 22  # chances a new enemy appears
-BOMB_ODDS = 60  # chances a new bomb will drop
+BULLET_ODDS = 60  # chances a new bullet will be shot
 ENEMY_RELOAD = 12  # frames between new enemies
 SCREENRECT = pg.Rect(0, 0, 640, 480)
 SCORE = 0
@@ -185,8 +185,8 @@ class Shot(pg.sprite.Sprite):
             self.kill()
 
 
-class Bomb(pg.sprite.Sprite):
-    """A bomb the enemy fighters drop."""
+class EnemyBullet(pg.sprite.Sprite):
+    """A bullet the enemy fighters shoot."""
 
     speed = 9
     images = []
@@ -202,12 +202,10 @@ class Bomb(pg.sprite.Sprite):
         Every frame we move the sprite 'rect' down.
         When it reaches the bottom we:
 
-        - make an explosion.
-        - remove the Bomb.
+        - remove the bullet.
         """
         self.rect.move_ip(0, self.speed)
         if self.rect.bottom >= SCREENRECT.height:
-            Explosion(self)
             self.kill()
 
 
@@ -249,7 +247,7 @@ def load_images():
     img = load_image("explosion.gif")
     Explosion.images = [img, pg.transform.flip(img, 1, 1)]
     Enemy.images = [load_image(im) for im in ("enemy.png",)]
-    Bomb.images = [load_image("bomb.png")]
+    EnemyBullet.images = [load_image("enemy_bullet.jpg")]
     Shot.images = [load_image("shot.png")]
 
 
@@ -298,7 +296,7 @@ def main(winstyle=0):
     # Initialize Game Groups
     enemies = pg.sprite.Group()
     shots = pg.sprite.Group()
-    bombs = pg.sprite.Group()
+    enemy_bullets = pg.sprite.Group()
     all = pg.sprite.RenderUpdates()
     lastenemy = pg.sprite.GroupSingle()
 
@@ -306,7 +304,7 @@ def main(winstyle=0):
     Player.containers = all
     Enemy.containers = enemies, all, lastenemy
     Shot.containers = shots, all
-    Bomb.containers = bombs, all
+    EnemyBullet.containers = enemy_bullets, all
     Explosion.containers = all
     Score.containers = all
 
@@ -371,9 +369,9 @@ def main(winstyle=0):
             Enemy()
             enemyreload = ENEMY_RELOAD
 
-        # Drop bombs
-        if lastenemy and not int(random.random() * BOMB_ODDS):
-            Bomb(lastenemy.sprite)
+        # shoot enemy bullets
+        if lastenemy and not int(random.random() * BULLET_ODDS):
+            EnemyBullet(lastenemy.sprite)
 
         # Detect collisions between enemies and players.
         for enemy in pg.sprite.spritecollide(player, enemies, 1):
@@ -391,12 +389,11 @@ def main(winstyle=0):
             Explosion(enemy)
             SCORE = SCORE + 1
 
-        # See if enemy bombs hit the player.
-        for bomb in pg.sprite.spritecollide(player, bombs, 1):
+        # See if enemy bullets hit the player.
+        for enemy_bullet in pg.sprite.spritecollide(player, enemy_bullets, 1):
             if pg.mixer:
                 boom_sound.play()
             Explosion(player)
-            Explosion(bomb)
             player.kill()
 
         # draw the scene
