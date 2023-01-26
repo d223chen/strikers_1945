@@ -125,13 +125,13 @@ class Enemy(pg.sprite.Sprite):
     def __init__(self):
         pg.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[0]
-        self.rect = self.image.get_rect(topleft=(random.random() * SCREENRECT.width,0))
+        self.rect = self.image.get_rect(topleft=(random.random() * SCREENRECT.width,- self.image.get_height()))
         self.facing = Enemy.speed
         self.frame = 0
         
     def update(self):
         self.rect.move_ip(0, self.facing)
-        if self.rect.top <= 0:
+        if self.rect.top >= SCREENRECT.height:
             self.kill()
         self.frame = self.frame + 1
         self.image = self.images[self.frame // self.animcycle % len(Enemy.images)]
