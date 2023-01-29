@@ -8,3 +8,8 @@ To run
 
 ```
 python main.py
+```
+
+Example:
+
+![image](https://user-images.githubusercontent.com/27775959/215300759-bff791d1-06a9-4f89-88cf-3be6e5077939.png)
